@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AQM Brokerage Identification
  * Description: Renders the RECO-required brokerage identification line on every page. Theme-independent, so it survives the Elementor exit.
- * Version:     1.1.0
+ * Version:     1.2.0
  * Author:      A. Q. Mufti
  * Plugin URI:  https://github.com/AQMufti/aqm-brokerage-footer
  * License:     GPL-2.0-or-later
@@ -45,7 +45,7 @@ defined( 'ABSPATH' ) || exit;
  * everything below would be declared twice and the site would fatal. Bail out
  * instead, and say why on the Plugins screen.
  */
-if ( class_exists( 'AQM_Brokerage_ID' ) ) {
+if ( file_exists( ( defined( 'WPMU_PLUGIN_DIR' ) ? WPMU_PLUGIN_DIR : WP_CONTENT_DIR . '/mu-plugins' ) . '/aqm-brokerage-footer.php' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
@@ -57,8 +57,38 @@ if ( class_exists( 'AQM_Brokerage_ID' ) ) {
 	return;
 }
 
+/*
+ * Belt and braces. The mu-plugin file is gone, but something else has already
+ * declared our symbols - so loading on would be a fatal redeclare. Bail out
+ * quietly and report WHERE it came from, using reflection, rather than blaming
+ * a file that is not there.
+ *
+ * Version 1.1.0 tested only class_exists( 'AQM_Brokerage_ID' ), which is a
+ * PROXY for "the old file is still present" rather than the thing itself. When
+ * the four files were deleted on 8 Sep 2026 the notices kept firing, because
+ * the proxy was answering a different question. Test the actual condition.
+ */
+if ( class_exists( 'AQM_Brokerage_ID' ) ) {
+	add_action(
+		'admin_notices',
+		function () {
+			$where = 'an unknown file';
+			try {
+				$r     = new ReflectionClass( 'AQM_Brokerage_ID' );
+				$where = '<code>' . esc_html( str_replace( ABSPATH, '', (string) $r->getFileName() ) ) . '</code>';
+			} catch ( Exception $e ) {
+				unset( $e );
+			}
+			echo '<div class="notice notice-warning"><p><strong>AQM Brokerage Identification</strong> stood down to avoid a duplicate declaration. '
+				. 'Something already defined <code>AQM_Brokerage_ID</code>, loaded from ' . $where . '. '
+				. 'No must-use copy is present, so this is not the old file.</p></div>';
+		}
+	);
+	return;
+}
+
 define( 'AQM_BROKERAGE_FILE', __FILE__ );
-define( 'AQM_BROKERAGE_VERSION', '1.1.0' );
+define( 'AQM_BROKERAGE_VERSION', '1.2.0' );
 define( 'AQM_BROKERAGE_GITHUB_REPO', 'AQMufti/aqm-brokerage-footer' );
 
 // Shared GitHub-release updater - identical mechanism in every AQM plugin.
@@ -98,7 +128,7 @@ add_filter(
 final class AQM_Brokerage_ID {
 
 	/** Bump if the wording below changes, so caches are easy to reason about. */
-	const VERSION = '1.1.0';
+	const VERSION = '1.2.0';
 
 	/**
 	 * The registered particulars. These are advertising-compliance content, not
