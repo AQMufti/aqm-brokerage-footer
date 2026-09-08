@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AQM Brokerage Identification
  * Description: Renders the RECO-required brokerage identification line on every page. Theme-independent, so it survives the Elementor exit.
- * Version:     1.4.0
+ * Version:     1.5.0
  * Author:      A. Q. Mufti
  * Plugin URI:  https://github.com/AQMufti/aqm-brokerage-footer
  * License:     GPL-2.0-or-later
@@ -48,7 +48,7 @@ defined( 'ABSPATH' ) || exit;
  * filters) and keeps the plugin repairable however badly the rest goes wrong.
  */
 define( 'AQM_BROKERAGE_FILE', __FILE__ );
-define( 'AQM_BROKERAGE_VERSION', '1.4.0' );
+define( 'AQM_BROKERAGE_VERSION', '1.5.0' );
 define( 'AQM_BROKERAGE_GITHUB_REPO', 'AQMufti/aqm-brokerage-footer' );
 
 // Shared GitHub-release updater - identical mechanism in every AQM plugin.
@@ -115,7 +115,7 @@ add_filter(
 final class AQM_Brokerage_ID {
 
 	/** Bump if the wording below changes, so caches are easy to reason about. */
-	const VERSION = '1.4.0';
+	const VERSION = '1.5.0';
 
 	/**
 	 * The registered particulars. These are advertising-compliance content, not
