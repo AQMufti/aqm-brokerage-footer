@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AQM Brokerage Identification
  * Description: Renders the RECO-required brokerage identification line on every page. Theme-independent, so it survives the Elementor exit.
- * Version:     1.3.0
+ * Version:     1.4.0
  * Author:      A. Q. Mufti
  * Plugin URI:  https://github.com/AQMufti/aqm-brokerage-footer
  * License:     GPL-2.0-or-later
@@ -48,7 +48,7 @@ defined( 'ABSPATH' ) || exit;
  * filters) and keeps the plugin repairable however badly the rest goes wrong.
  */
 define( 'AQM_BROKERAGE_FILE', __FILE__ );
-define( 'AQM_BROKERAGE_VERSION', '1.3.0' );
+define( 'AQM_BROKERAGE_VERSION', '1.4.0' );
 define( 'AQM_BROKERAGE_GITHUB_REPO', 'AQMufti/aqm-brokerage-footer' );
 
 // Shared GitHub-release updater - identical mechanism in every AQM plugin.
@@ -62,54 +62,31 @@ new AQM_Updater(
 );
 
 /*
- * CONVERSION GUARD - remove after the mu-plugin copy is gone.
+ * THE CONVERSION GUARDS ARE GONE - 8 Sep 2026, and they are not coming back.
  *
- * This was a must-use plugin until 8 Sep 2026. mu-plugins load BEFORE regular
- * plugins, so if the old mu-plugins/aqm-brokerage-footer.php is still on the server
- * everything below would be declared twice and the site would fatal. Bail out
- * instead, and say why on the Plugins screen.
+ * This file carried two of them: one testing whether the old must-use copy was
+ * still on disk, and one testing class_exists( 'AQM_Brokerage_ID' ) before
+ * loading on. The second could NEVER be false, and it broke the plugin.
+ *
+ * PHP hoists unconditional top-level function and class declarations when a
+ * file is included - they exist before the file's first statement runs. So by
+ * the time that guard was evaluated, AQM_Brokerage_ID was already
+ * defined BY THIS FILE, a few lines below. The guard returned every single
+ * time, and nothing after it ever executed: no add_action, no add_shortcode,
+ * no admin screen. The functions existed; none of them were ever hooked.
+ *
+ * That is why the RECO brokerage line was missing from the site, and why the
+ * reviews stopped rendering, from the moment these plugins were converted.
+ *
+ * The file_exists() guard went too, because it cannot help either: if a
+ * must-use copy declared these same symbols, PHP would fatal on the redeclare
+ * as this file was included, long before any runtime check could return. The
+ * only guard that would work is wrapping the whole file in
+ * if ( ! class_exists( 'AQM_Brokerage_ID' ) ) - which is what AQM Form Spam
+ * Guard does. The must-use copies are deleted and archived, so nothing here
+ * needs guarding at all.
  */
-if ( file_exists( ( defined( 'WPMU_PLUGIN_DIR' ) ? WPMU_PLUGIN_DIR : WP_CONTENT_DIR . '/mu-plugins' ) . '/aqm-brokerage-footer.php' ) ) {
-	add_action(
-		'admin_notices',
-		function () {
-			echo '<div class="notice notice-error"><p><strong>AQM Brokerage Identification</strong> is not running. '
-				. 'The old must-use copy at <code>wp-content/mu-plugins/aqm-brokerage-footer.php</code> is still on the server '
-				. 'and loads first. Delete that file, then reload this page.</p></div>';
-		}
-	);
-	return;
-}
 
-/*
- * Belt and braces. The mu-plugin file is gone, but something else has already
- * declared our symbols - so loading on would be a fatal redeclare. Bail out
- * quietly and report WHERE it came from, using reflection, rather than blaming
- * a file that is not there.
- *
- * Version 1.1.0 tested only class_exists( 'AQM_Brokerage_ID' ), which is a
- * PROXY for "the old file is still present" rather than the thing itself. When
- * the four files were deleted on 8 Sep 2026 the notices kept firing, because
- * the proxy was answering a different question. Test the actual condition.
- */
-if ( class_exists( 'AQM_Brokerage_ID' ) ) {
-	add_action(
-		'admin_notices',
-		function () {
-			$where = 'an unknown file';
-			try {
-				$r     = new ReflectionClass( 'AQM_Brokerage_ID' );
-				$where = '<code>' . esc_html( str_replace( ABSPATH, '', (string) $r->getFileName() ) ) . '</code>';
-			} catch ( Exception $e ) {
-				unset( $e );
-			}
-			echo '<div class="notice notice-warning"><p><strong>AQM Brokerage Identification</strong> stood down to avoid a duplicate declaration. '
-				. 'Something already defined <code>AQM_Brokerage_ID</code>, loaded from ' . $where . '. '
-				. 'No must-use copy is present, so this is not the old file.</p></div>';
-		}
-	);
-	return;
-}
 
 /*
  * WHY THE DEACTIVATE LINK IS REMOVED
@@ -138,7 +115,7 @@ add_filter(
 final class AQM_Brokerage_ID {
 
 	/** Bump if the wording below changes, so caches are easy to reason about. */
-	const VERSION = '1.3.0';
+	const VERSION = '1.4.0';
 
 	/**
 	 * The registered particulars. These are advertising-compliance content, not
