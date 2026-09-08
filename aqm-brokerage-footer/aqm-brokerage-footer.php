@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AQM Brokerage Identification
  * Description: Renders the RECO-required brokerage identification line on every page. Theme-independent, so it survives the Elementor exit.
- * Version:     1.2.0
+ * Version:     1.3.0
  * Author:      A. Q. Mufti
  * Plugin URI:  https://github.com/AQMufti/aqm-brokerage-footer
  * License:     GPL-2.0-or-later
@@ -36,6 +36,30 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+/*
+ * THE UPDATER IS CONSTRUCTED FIRST, DELIBERATELY.
+ *
+ * In 1.1.0 and 1.2.0 the conversion guard ran BEFORE this block and returned
+ * early, so AQM_Updater was never constructed - which removed the "Check for
+ * updates" link from this plugin's row and left no way to update it except a
+ * manual zip upload. A guard that disables the thing that would have fixed the
+ * guard is a trap. Registering the updater first costs nothing (it only adds
+ * filters) and keeps the plugin repairable however badly the rest goes wrong.
+ */
+define( 'AQM_BROKERAGE_FILE', __FILE__ );
+define( 'AQM_BROKERAGE_VERSION', '1.3.0' );
+define( 'AQM_BROKERAGE_GITHUB_REPO', 'AQMufti/aqm-brokerage-footer' );
+
+// Shared GitHub-release updater - identical mechanism in every AQM plugin.
+require_once __DIR__ . '/aqm-updater.php';
+new AQM_Updater(
+	__FILE__,
+	AQM_BROKERAGE_VERSION,
+	AQM_BROKERAGE_GITHUB_REPO,
+	'AQM Brokerage Identification',
+	'Renders the RECO-required brokerage identification line on every page.'
+);
 
 /*
  * CONVERSION GUARD - remove after the mu-plugin copy is gone.
@@ -87,20 +111,6 @@ if ( class_exists( 'AQM_Brokerage_ID' ) ) {
 	return;
 }
 
-define( 'AQM_BROKERAGE_FILE', __FILE__ );
-define( 'AQM_BROKERAGE_VERSION', '1.2.0' );
-define( 'AQM_BROKERAGE_GITHUB_REPO', 'AQMufti/aqm-brokerage-footer' );
-
-// Shared GitHub-release updater - identical mechanism in every AQM plugin.
-require_once __DIR__ . '/aqm-updater.php';
-new AQM_Updater(
-	__FILE__,
-	AQM_BROKERAGE_VERSION,
-	AQM_BROKERAGE_GITHUB_REPO,
-	'AQM Brokerage Identification',
-	'Renders the RECO-required brokerage identification line on every page.'
-);
-
 /*
  * WHY THE DEACTIVATE LINK IS REMOVED
  *
@@ -128,7 +138,7 @@ add_filter(
 final class AQM_Brokerage_ID {
 
 	/** Bump if the wording below changes, so caches are easy to reason about. */
-	const VERSION = '1.2.0';
+	const VERSION = '1.3.0';
 
 	/**
 	 * The registered particulars. These are advertising-compliance content, not
